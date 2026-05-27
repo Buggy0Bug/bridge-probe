@@ -1,130 +1,33 @@
-<!DOCTYPE html>
-<html>                                                                                                                                                       
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">                                                              
-<title>Bridge Probe</title>                                                                                                                                  
-<style>body{font-family:monospace;font-size:12px;padding:10px;background:#111;color:#0f0}
-.found{color:#f00;font-weight:bold;font-size:14px}.section{margin:10px 0;padding:5px;border:1px solid #333}</style>
-</head>
-<body>
-<h2>KuCoin WebView Bridge Probe</h2>
-<div id="results"></div>
-<script>
-var r = document.getElementById('results');
-function log(msg, cls) {
-    var d = document.createElement('div');
-    d.className = cls || '';
-    d.textContent = msg;
-    r.appendChild(d);
-}
-function logFound(msg) { log('🔴 FOUND: ' + msg, 'found'); }
+  <html><body>
+  <pre id="r">Loading...</pre>
+  <script>
+  var o = "";
+  o += "URL: " + location.href + "\n";
+  o += "UA: " + navigator.userAgent + "\n\n";
 
-log('=== JS Interface Enumeration ===');
-log('URL: ' + location.href);
-log('User-Agent: ' + navigator.userAgent);
-log('Cookies: ' + (document.cookie || 'none'));
-
-// 1. Check known KuCoin bridges
-log('');
-log('=== Known KuCoin Bridges ===');
-var bridges = [
-    'kcwallet', 'KuCoin', 'JSInterface', 'AdaAndroid', 
-    'nativeCall', 'jsBridge', 'webkit', 'Android',
-    'KCBridge', 'KuCoinBridge', 'appBridge', 'NativeBridge',
-    'FlutterBridge', 'flutter_inappwebview'
-];
-bridges.forEach(function(name) {
-    if (window[name] !== undefined) {
-        logFound(name + ' = ' + typeof window[name]);
-        // Enumerate methods
-        try {
-            var obj = window[name];
-            if (typeof obj === 'object') {
-                var keys = Object.getOwnPropertyNames(obj);
-                keys.forEach(function(k) {
-                    log('  .' + k + ' = ' + typeof obj[k]);
-                });
-            }
-        } catch(e) { log('  (cannot enumerate: ' + e.message + ')'); }
-    }
-});
-
-// 2. Check webkit.messageHandlers (iOS-style bridge used in Flutter)
-log('');
-log('=== webkit.messageHandlers ===');
-if (window.webkit && window.webkit.messageHandlers) {
-    logFound('webkit.messageHandlers exists');
-    try {
-        var handlers = Object.getOwnPropertyNames(window.webkit.messageHandlers);
-        handlers.forEach(function(h) { log('  handler: ' + h); });
-    } catch(e) { log('  (cannot enumerate)'); }
-}
-
-// 3. Check for postMessage channel
-log('');
-log('=== Flutter InAppWebView Channel ===');
-if (window.flutter_inappwebview) {
-    logFound('flutter_inappwebview exists');
-    try {
-        var keys = Object.getOwnPropertyNames(window.flutter_inappwebview);
-        keys.forEach(function(k) { log('  .' + k + ' = ' + typeof window.flutter_inappwebview[k]); });
-    } catch(e) {}
-}
-if (window.flutter_inappwebview && window.flutter_inappwebview.callHandler) {
-    logFound('flutter_inappwebview.callHandler available!');
-}
-
-// 4. Check prompt() override (KuCoin's disclosed JSBridge mechanism)
-log('');
-log('=== prompt() Bridge Test ===');
-try {
-    var promptResult = prompt('wireframe', '{}');
-    log('prompt("wireframe","{}") returned: ' + JSON.stringify(promptResult));
-    if (promptResult && promptResult !== '{}') {
-        logFound('prompt() bridge is ACTIVE! Response: ' + promptResult);
-    }
-} catch(e) { log('prompt() error: ' + e.message); }
-
-// 5. Enumerate ALL window properties that look like bridges
-log('');
-log('=== All Non-Standard Window Properties ===');
-var standardProps = ['location','navigator','document','console','performance','screen',
-    'history','localStorage','sessionStorage','crypto','indexedDB','caches',
-    'alert','confirm','prompt','fetch','XMLHttpRequest','WebSocket',
-    'setTimeout','setInterval','requestAnimationFrame','postMessage',
-    'addEventListener','removeEventListener','dispatchEvent','getComputedStyle',
-    'matchMedia','getSelection','scrollTo','scrollBy','moveTo','moveBy',
-    'resizeTo','resizeBy','open','close','stop','focus','blur','print',
-    'btoa','atob','escape','unescape','decodeURI','encodeURI',
-    'decodeURIComponent','encodeURIComponent','isNaN','isFinite','parseInt',
-    'parseFloat','undefined','NaN','Infinity','eval','Object','Function',
-    'Boolean','Symbol','Error','Number','BigInt','Math','Date','String',
-    'RegExp','Array','Map','Set','WeakMap','WeakSet','ArrayBuffer',
-    'SharedArrayBuffer','DataView','JSON','Promise','Proxy','Reflect',
-    'Intl','WebAssembly','self','window','frames','parent','top','length','name',
-    'customElements','origin','closed','toolbar','menubar','personalbar',
-    'scrollbars','statusbar','locationbar','onload','onerror'];
-
-var found = [];
-for (var prop in window) {
-    if (standardProps.indexOf(prop) === -1 && typeof window[prop] !== 'undefined') {
-        var type = typeof window[prop];
-        if (type === 'object' || type === 'function') {
-            if (prop.length < 50) found.push(prop + ' (' + type + ')');
+      o += "FOUND: " + n + " (" + typeof window[n] + ")\n";
+      try {
+        if (typeof window[n] === "object") {
+          Object.getOwnPropertyNames(window[n]).forEach(function(k) {
+            o += "  ." + k + " = " + typeof window[n][k] + "\n";
+          });
         }
+      } catch(e) { o += "  (error: " + e.message + ")\n"; }
     }
-}
-found.sort().forEach(function(f) { log('  window.' + f); });
+  });
 
-// 6. Try to access cookies for kucoin.com domain
-log('');
-log('=== Cookie Access ===');
-log('document.cookie: ' + (document.cookie || '(empty)'));
-log('document.domain: ' + document.domain);
+  o += "\n=== NON-STANDARD OBJECTS ===\n";
+  var skip = "location,navigator,document,console,performance,screen,history,localStorage,sessionStorage,crypto,self,window,frames,parent,top,length,name,cus
+  tomElements,origin,closed".split(",");
+  for (var p in window) {
+    try {
+      if (skip.indexOf(p) === -1 && typeof window[p] === "object" && p.length < 30) {
+        o += "window." + p + "\n";
+      }
+    } catch(e) {}
+  }
 
-// 7. Send results to attacker server (simulated)
-log('');
-log('=== Probe Complete ===');
-log('Timestamp: ' + new Date().toISOString());
-</script>
-</body>
-</html>
+  o += "\nDONE: " + new Date().toISOString();
+  document.getElementById("r").textContent = o;
+  </script>
+  </body></html>
